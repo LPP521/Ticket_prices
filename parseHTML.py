@@ -22,8 +22,8 @@ for i in items:
 
     price = 0
     company_name = soup.find(class_="a_name").get_text().encode("utf-8")
-
-
+    departure_time = soup.find(class_="a_tm_dep").get_text().encode("utf-8")
+    arrival_time = soup.find(class_="a_tm_arv").get_text().encode("utf-8")
 
     width_left = soup.find(style="width:33px;left:-33px")
     if width_left == None:
@@ -61,7 +61,7 @@ for i in items:
         #print("_left11:%d"%num_left11)
 
     
-    print("{0}  {1}{2}{3}".format(company_name,num_left33, num_left22, num_left11))
+    print("{0}   {4} - {5}   ￥{1}{2}{3}".format(company_name,num_left33, num_left22, num_left11, departure_time, arrival_time))
 
 
 #s = soup.prettify()
