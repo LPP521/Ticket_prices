@@ -4,8 +4,9 @@ import gtk, webkit
 import time
 import gobject
 
+WAITE_TIME = 30
 gobject.threads_init()
-google = "http://flight.qunar.com/site/oneway_list.htm?searchDepartureAirport=%E5%93%88%E5%B0%94%E6%BB%A8&searchArrivalAirport=%E4%B8%8A%E6%B5%B7&searchDepartureTime=2014-04-17&searchArrivalTime=2014-04-19&nextNDays=0&startSearch=true&from=fi_ont_search"
+
 
 class WebView(webkit.WebView):
     #return page's content
@@ -24,8 +25,8 @@ class TimeSender(gobject.GObject, threading.Thread):
         window.emit("Sender_signal")
 
     def run(self):
-        print "sleep 20 seconds"
-        time.sleep(20)
+        print "sleep {0} seconds".format(WAITE_TIME)
+        time.sleep(WAITE_TIME)
         gobject.idle_add(self.myEmit)
 
 
@@ -55,7 +56,9 @@ class Window(gtk.Window, gobject.GObject):
 if __name__ == '__main__':
     gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
     time_sender = TimeSender()
-    window = Window(time_sender, google)
+    go_time = "2014-06-30"
+    url = "http://flight.qunar.com/site/oneway_list.htm?searchDepartureAirport=%E5%93%88%E5%B0%94%E6%BB%A8&searchArrivalAirport=%E4%B8%8A%E6%B5%B7&searchDepartureTime={0}&searchArrivalTime=2014-04-19&nextNDays=0&startSearch=true&from=fi_ont_search".format(go_time)
+    window = Window(time_sender, url)
     
     time_sender.start()
     window.open_page()
