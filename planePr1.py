@@ -47,7 +47,7 @@ class Window(gtk.Window, gobject.GObject):
         gtk.main()
     #write html to file
     def _finished_loading(self, view1):
-        with open("pagehtml1.html", 'w') as f:
+        with open("/var/www/pagehtml1.html", 'w') as f:
             f.write(self.view.get_html())
         gtk.main_quit()
 

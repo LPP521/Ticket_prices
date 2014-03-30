@@ -2,7 +2,7 @@
 from bs4 import BeautifulSoup
 import re
 
-content = open("pagehtml1.html","r").read()
+content = open("/var/www/pagehtml1.html","r").read()
 
 p = re.compile( '.*hdivResultPanel')
 useful_info = p.sub( '', content, count=1)
