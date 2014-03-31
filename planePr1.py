@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+#coding=utf-8
 import sys, threading
 import gtk, webkit
 import time
@@ -29,7 +30,7 @@ class TimeSender(gobject.GObject, threading.Thread):
         gobject.idle_add(self.myEmit)
 
 
-gobject.type_register(TimeSender)
+#gobject.type_register(TimeSender)
 
 class Window(gtk.Window, gobject.GObject):
     def __init__(self, time_sender, url, go_time):
@@ -54,14 +55,18 @@ class Window(gtk.Window, gobject.GObject):
 
 
 if __name__ == '__main__':
+        i = 1
+        while True:
+            if (i == 1):
+                gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
+                i = 0
+            time_sender = TimeSender()
+            go_time = "2014-06-30"
+            url = "http://flight.qunar.com/site/oneway_list.htm?searchDepartureAirport=%E5%93%88%E5%B0%94%E6%BB%A8&searchArrivalAirport=%E4%B8%8A%E6%B5%B7&searchDepartureTime={0}&searchArrivalTime=2014-04-19&nextNDays=0&startSearch=true&from=fi_ont_search".format(go_time)
+            window = Window(time_sender, url, go_time)
     
-    
-    gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
-    time_sender = TimeSender()
-    go_time = "2014-06-30"
-    url = "http://flight.qunar.com/site/oneway_list.htm?searchDepartureAirport=%E5%93%88%E5%B0%94%E6%BB%A8&searchArrivalAirport=%E4%B8%8A%E6%B5%B7&searchDepartureTime={0}&searchArrivalTime=2014-04-19&nextNDays=0&startSearch=true&from=fi_ont_search".format(go_time)
-    window = Window(time_sender, url, go_time)
-    
-    time_sender.start()
-    window.open_page()
+            time_sender.start()
+            window.open_page()
+            print("退出阻塞，等待重启。")
+            time.sleep(60)
     
