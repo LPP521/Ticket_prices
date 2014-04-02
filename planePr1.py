@@ -33,7 +33,7 @@ class TimeSender(gobject.GObject, threading.Thread):
 #gobject.type_register(TimeSender)
 
 class Window(gtk.Window, gobject.GObject):
-    def __init__(self, time_sender, url, go_time):
+    def __init__(self, url, go_time):
         self.__gobject_init__()
         gtk.Window.__init__(self)
         self.connect('Sender_signal', self._finished_loading)
@@ -56,15 +56,12 @@ class Window(gtk.Window, gobject.GObject):
 
 
 if __name__ == '__main__':
-        Run_Once = True
+        gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
         while True:
-            if (Run_Once  == True):
-                gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
-                Run_Once = False
             time_sender = TimeSender()
             go_time = "2014-06-19"
             url = "http://flight.qunar.com/site/oneway_list.htm?searchDepartureAirport=%E5%93%88%E5%B0%94%E6%BB%A8&searchArrivalAirport=%E4%B8%8A%E6%B5%B7&searchDepartureTime={0}&searchArrivalTime=2014-04-19&nextNDays=0&startSearch=true&from=fi_ont_search".format(go_time)
-            window = Window(time_sender, url, go_time)
+            window = Window(url, go_time)
     
             time_sender.start()
             window.open_page()
