@@ -28,9 +28,10 @@ class TimeSender(gobject.GObject, threading.Thread):
 
     def run(self):
         print "sleep {0} seconds".format(WAITE_TIME)
+        print("time_start at {0}".format(time.time()))
         time.sleep(WAITE_TIME)
         gobject.idle_add(self.myEmit)
-
+        print("time_start end {0}".format(time.time()))
 
 
 class Window(gtk.Window, gobject.GObject):
@@ -49,9 +50,10 @@ class Window(gtk.Window, gobject.GObject):
 
     def _finished_loading(self, view1):
         gtk.main_quit()
-        
+        a = time.time()
         parseHTML1.parse( self.view.get_html() )
-
+        b = time.time()
+        print("Get html and parse:"+ str(b-a))
 
 def url(Depart, Arrival, go_time):
 
@@ -68,49 +70,92 @@ def url(Depart, Arrival, go_time):
     return url
 
 def append_date(year, month, day):
-    if year>2013 and year<2038 and month>0 and month<13 and day>0 and year%1==0 and month%1==0:
-        if calendar.monthrange(year, month)[1] >= day:
-            print "Right Go_Time"
-            if month < 10:
-                s_y = str(year)
-                s_m = "0{0}".format(month)
-                if day<10:
-                    s_d = "0{0}".format(day)
-                else:
-                    s_d = "{0}".format(day)
-            else :
-                s_y = str(year)
-                s_m = "{0}".format(month)
-                if day < 10:
-                    s_d = "0{0}".format(day)
-                else:
-                    s_d = "{0}".format(day)
-            print s_y + "-" + s_m + "-" + s_d
-            return s_y + "-" + s_m + "-" + s_d
+
+    if month < 10:
+        s_y = str(year)
+        s_m = "0{0}".format(month)
+        if day<10:
+            s_d = "0{0}".format(day)
         else:
-            print "DAY Wrong!*********"
-            return 0
+            s_d = "{0}".format(day)
+    else :
+        s_y = str(year)
+        s_m = "{0}".format(month)
+        if day < 10:
+            s_d = "0{0}".format(day)
+        else:
+            s_d = "{0}".format(day)
+    print s_y + "-" + s_m + "-" + s_d
+    return s_y + "-" + s_m + "-" + s_d
+    
+
+
+def date_legal(year,month,day):
+    if   year<2013:
+        print "erro: Year < 2013"
+        return False
+    elif year>2038:
+        print "erro: Year > 2038"
+        return False
+    elif month<0:
+        print "erro: Month < 0"
+        return False
+    elif month>13:
+        print "erro: Month > 13"
+        return False
+    elif day<0:
+        print "erro: day < 0"
+        return False
+    elif day>calendar.monthrange(year, month)[1]:
+        print "erro: day Too Large"
+        return False
+    elif year%1!=0:
+        print "erro: year % 1 != 0"
+        return False
+    elif month%1!=0:
+        print "erro: Month % 1 != 0"
+        return False
+    elif day%1!=0:
+        print "erro: day % 1 != 0"
+        return False
     else:
-        print "Wrong Go_Time!!!"
-        return 0
+        return True
 
 
 
-if __name__ == '__main__':
-        
-        gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
-        year = 2014
-        month = 5
-        day = 25
-        Depart = "哈尔滨"
-        Arrival = "上海"
-        go_time = append_date(year, month, day)
-        
+def arr_days(year,month,day):
+    days = []
+    first_month_max_day = calendar.monthrange(year, month)[1]
+    
+    if first_month_max_day == day:
+        days.append(day)
+    elif first_month_max_day > day:
+        for i in xrange(day, first_month_max_day+1):
+            days.append(i)
+    for i in xrange(1, 1 + calendar.monthrange(year, month + 1)[1]):
+        days.append(i)
+    return days
+
+
+start_time = time.time()
+gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
+year = 2014
+month = 5
+day = 25
+Depart = "哈尔滨"
+Arrival = "上海"
+
+if date_legal(year, month, day):
+    arr_days = arr_days(year, month, day)
+    for i in arr_days:
+        if i < i-1:
+            month += 1
+        go_time = append_date(year, month, i)
         window   =  Window(url(Depart, Arrival, go_time))
         time_sender = TimeSender()
-
         time_sender.start()
+        print("Window at {0}".format(time.time()))
         window.open_page()
-
-        print("退出阻塞，等待重启。")
-        #time.sleep(60)
+        print("Window end {0}".format(time.time()))
+        
+        time.sleep(120)
