@@ -2,7 +2,12 @@
 from bs4 import BeautifulSoup
 import re
 def parse(content):
-    
+    content = content.encode("utf-8")
+    f = open ( '/var/www/log_plane.html', 'w' )
+    f.write ( content )
+    f.close()
+    print("HTML put in file '/var/www/log_plane.html'.")
+
     p = re.compile( '.*hdivResultPanel')
     useful_info = p.sub( '', content, count=1)
     soup = BeautifulSoup(useful_info)

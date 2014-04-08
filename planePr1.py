@@ -8,7 +8,7 @@ import parseHTML1
 from urllib import quote
 import calendar
 
-WAITE_TIME = 30
+WAITE_TIME = 100
 gobject.threads_init()
 
 class WebView(webkit.WebView):
@@ -28,10 +28,8 @@ class TimeSender(gobject.GObject, threading.Thread):
 
     def run(self):
         print "sleep {0} seconds".format(WAITE_TIME)
-        print("time_start at {0}".format(time.time()))
         time.sleep(WAITE_TIME)
         gobject.idle_add(self.myEmit)
-        print("time_start end {0}".format(time.time()))
 
 
 class Window(gtk.Window, gobject.GObject):
@@ -53,14 +51,11 @@ class Window(gtk.Window, gobject.GObject):
         a = time.time()
         parseHTML1.parse( self.view.get_html() )
         b = time.time()
-        print("Get html and parse:"+ str(b-a))
 
 def url(Depart, Arrival, go_time):
-
     Depart   =  quote(Depart)
     Arrival  =  quote(Arrival)
     url      =  "http://flight.qunar.com/site/oneway_list.htm?searchDepartureAirport={0}&searchArrivalAirport={1}&searchDepartureTime={2}&searchArrivalTime=2014-04-19&nextNDays=0&startSearch=True&from=fi_ont_search".format(Depart, Arrival, go_time)
-
     now_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
     f = open ( '/var/www/plane_price.txt', 'a' )
@@ -70,7 +65,6 @@ def url(Depart, Arrival, go_time):
     return url
 
 def append_date(year, month, day):
-
     if month < 10:
         s_y = str(year)
         s_m = "0{0}".format(month)
@@ -85,7 +79,6 @@ def append_date(year, month, day):
             s_d = "0{0}".format(day)
         else:
             s_d = "{0}".format(day)
-    print s_y + "-" + s_m + "-" + s_d
     return s_y + "-" + s_m + "-" + s_d
     
 
@@ -137,12 +130,13 @@ def arr_days(year,month,day):
     return days
 
 
-start_time = time.time()
+print("main start")
+
 gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
-year = 2014
-month = 5
-day = 25
-Depart = "哈尔滨"
+year    = 2014
+month   = 5
+day     = 25
+Depart  = "哈尔滨"
 Arrival = "上海"
 
 if date_legal(year, month, day):
@@ -150,12 +144,11 @@ if date_legal(year, month, day):
     for i in arr_days:
         if i < i-1:
             month += 1
-        go_time = append_date(year, month, i)
-        window   =  Window(url(Depart, Arrival, go_time))
+        go_time     = append_date(year, month, i)
+        window      = Window( url(Depart, Arrival, go_time) )
         time_sender = TimeSender()
         time_sender.start()
-        print("Window at {0}".format(time.time()))
+
         window.open_page()
-        print("Window end {0}".format(time.time()))
-        
-        time.sleep(120)
+        print("sleep wait next fetch")
+        time.sleep(240)
