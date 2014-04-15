@@ -41,7 +41,6 @@ class Window(gtk.Window, gobject.GObject):
 
     def open_page(self):
         self.view = WebView()
-        self.view.get_html()
         self.view.open(self._url)
         self.add(self.view)
         gtk.main()
@@ -82,7 +81,6 @@ def append_date(year, month, day):
     return s_y + "-" + s_m + "-" + s_d
     
 
-
 def date_legal(year,month,day):
     if   year<2013:
         print "erro: Year < 2013"
@@ -113,7 +111,6 @@ def date_legal(year,month,day):
         return False
     else:
         return True
-
 
 
 def arr_days(year,month,day):
