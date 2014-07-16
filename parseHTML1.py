@@ -1,12 +1,13 @@
 #coding=utf-8
-from bs4 import BeautifulSoup
 import re
+from bs4 import BeautifulSoup
 def parse(content):
     content = content.encode("utf-8")
-    f = open ( '/var/www/log_plane.html', 'w' )
-    f.write ( content )
-    f.close()
-    print("HTML put in file '/var/www/log_plane.html'.")
+    #next 4 lines are for test
+    #f = open ( '/var/www/log_plane.html', 'w' )
+    #f.write ( content )
+    #f.close()
+    #print("HTML put in file '/var/www/log_plane.html'.")
 
     p = re.compile( '.*hdivResultPanel')
     useful_info = p.sub( '', content, count=1)
@@ -63,7 +64,7 @@ def parse(content):
         
         print("{0}   {4} - {5}   ￥{1}{2}{3}".format(company_name,num_left33, num_left22, num_left11, departure_time, arrival_time))
 
-        f = open ( '/var/www/plane_price.txt', 'a' )
+        f = open ( 'plane_price.txt', 'a' )
         f.write ( "{0}   {4} - {5}   ￥{1}{2}{3}\n".format(company_name,num_left33, num_left22, num_left11, departure_time, arrival_time) )
         f.close()
 

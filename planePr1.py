@@ -1,14 +1,21 @@
 #!/usr/bin/env python
 #coding=utf-8
 import sys, threading
-import gtk, webkit
+#from gi.repository import Gtk
+import gtk
+import webkit
 import time
 import gobject
+import re
+
 import parseHTML1
+from exception import *
+
 from urllib import quote
 import calendar
 
-WAITE_TIME = 100
+
+WAITE_TIME = 20
 gobject.threads_init()
 
 class WebView(webkit.WebView):
@@ -27,7 +34,7 @@ class TimeSender(gobject.GObject, threading.Thread):
         window.emit("Sender_signal")
 
     def run(self):
-        print "sleep {0} seconds".format(WAITE_TIME)
+        print("sleep {0} seconds".format(WAITE_TIME))
         time.sleep(WAITE_TIME)
         gobject.idle_add(self.myEmit)
 
@@ -47,9 +54,8 @@ class Window(gtk.Window, gobject.GObject):
 
     def _finished_loading(self, view1):
         gtk.main_quit()
-        a = time.time()
         parseHTML1.parse( self.view.get_html() )
-        b = time.time()
+
 
 def url(Depart, Arrival, go_time):
     Depart   =  quote(Depart)
@@ -57,95 +63,84 @@ def url(Depart, Arrival, go_time):
     url      =  "http://flight.qunar.com/site/oneway_list.htm?searchDepartureAirport={0}&searchArrivalAirport={1}&searchDepartureTime={2}&searchArrivalTime=2014-04-19&nextNDays=0&startSearch=True&from=fi_ont_search".format(Depart, Arrival, go_time)
     now_time = time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time()))
 
-    f = open ( '/var/www/plane_price.txt', 'a' )
+    f = open ( 'plane_price.txt', 'a' )
     f.write ( "{0}       {1}\n".format(go_time, now_time) )
     f.close()
-
+    print("--------------\n{0}\n--------------".format(url))
     return url
 
 def append_date(year, month, day):
     if month < 10:
-        s_y = str(year)
-        s_m = "0{0}".format(month)
+        str_y = str(year)
+        str_m = "0{0}".format(month)
         if day<10:
-            s_d = "0{0}".format(day)
+            str_d = "0{0}".format(day)
         else:
-            s_d = "{0}".format(day)
+            str_d = "{0}".format(day)
     else :
-        s_y = str(year)
-        s_m = "{0}".format(month)
+        str_y = str(year)
+        str_m = "{0}".format(month)
         if day < 10:
-            s_d = "0{0}".format(day)
+            str_d = "0{0}".format(day)
         else:
-            s_d = "{0}".format(day)
-    return s_y + "-" + s_m + "-" + s_d
+            str_d = "{0}".format(day)
+    return str_y + "-" + str_m + "-" + str_d
     
 
 def date_legal(year,month,day):
-    if   year<2013:
-        print "erro: Year < 2013"
-        return False
-    elif year>2038:
-        print "erro: Year > 2038"
-        return False
-    elif month<0:
-        print "erro: Month < 0"
-        return False
-    elif month>13:
-        print "erro: Month > 13"
-        return False
-    elif day<0:
-        print "erro: day < 0"
-        return False
-    elif day>calendar.monthrange(year, month)[1]:
-        print "erro: day Too Large"
-        return False
-    elif year%1!=0:
-        print "erro: year % 1 != 0"
-        return False
-    elif month%1!=0:
-        print "erro: Month % 1 != 0"
-        return False
-    elif day%1!=0:
-        print "erro: day % 1 != 0"
-        return False
-    else:
-        return True
-
-
-def arr_days(year,month,day):
-    days = []
-    first_month_max_day = calendar.monthrange(year, month)[1]
+    try:
+        if   year<2013:
+            raise InputDateError("Year < 2013")
+        elif year>2038:
+            raise InputDateError("Year > 2038")
+        elif month<0:
+            raise InputDateError("Month < 0")
+        elif month>13:
+            raise InputDateError("Month > 13")
+        elif day<0:
+            raise InputDateError("Day < 0")
+        elif day>calendar.monthrange(year, month)[1]:
+            raise InputDateError("No {0} days this month".format(day))
+        elif year%1!=0:
+            raise InputDateError("Year % 1 != 0")
+        elif month%1!=0:
+            raise InputDateError("Month % 1 != 0")
+        elif day%1!=0:
+            raise InputDateError("Day % 1 != 0")
+        else:
+            pass
+    except InputDateError as e:
+        print('InputDateError: '+(''.join(e.args)))
+        exit()
     
-    if first_month_max_day == day:
-        days.append(day)
-    elif first_month_max_day > day:
-        for i in xrange(day, first_month_max_day+1):
-            days.append(i)
-    for i in xrange(1, 1 + calendar.monthrange(year, month + 1)[1]):
-        days.append(i)
-    return days
 
 
-print("main start")
 
+print("-----main start-----")
+#def console_arg(argv):
+#    str_arg = "".join(argv)
+#    print(str_arg)
+#    date = re.search('\d\d\d\d', str_arg).group(0)
+#    start_area = re.search("[^0-9A-Za-z\.]\w+(?=到\w+)", str_arg).group(0)
+#    end_area = re.search("(?<=到)\w+", str_arg).group(0)
+#    
+#    print(date)
+#    print(start_area)
+#    print(end_area)
+
+#console_arg(sys.argv)
 gobject.signal_new("Sender_signal", Window, gobject.SIGNAL_RUN_FIRST, gobject.TYPE_NONE, ())
-year    = 2014
-month   = 5
-day     = 25
+year    = int(time.strftime('%Y',time.localtime(time.time())))
+month   = 8
+day     = 30
 Depart  = "哈尔滨"
 Arrival = "上海"
 
-if date_legal(year, month, day):
-    arr_days = arr_days(year, month, day)
-    for i in arr_days:
-        if i < i-1:
-            month += 1
-        go_time     = append_date(year, month, i)
-        window      = Window( url(Depart, Arrival, go_time) )
-        time_sender = TimeSender()
-        time_sender.start()
+date_legal(year, month, day)
+go_time     = append_date(year, month, day)
+window      = Window( url(Depart, Arrival, go_time) )
+time_sender = TimeSender()
+time_sender.start()
+window.open_page()
 
-        window.open_page()
-        print("sleep wait next fetch")
-        time.sleep(240)
+        
